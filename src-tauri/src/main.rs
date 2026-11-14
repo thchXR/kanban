@@ -13,6 +13,28 @@ use uuid::Uuid;
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct SubCard {
+    pub id: String,
+    pub title: String,
+    pub column_id: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubColumn {
+    pub id: String,
+    pub title: String,
+    pub cards: Vec<SubCard>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubBoard {
+    pub columns: Vec<SubColumn>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Card {
     pub id: String,
     pub title: String,
@@ -20,6 +42,8 @@ pub struct Card {
     pub labels: Vec<String>,
     #[serde(default)]
     pub label_colors: HashMap<String, String>,
+    #[serde(default)]
+    pub sub_board: Option<SubBoard>,
     pub assignee: String,
     pub due_date: Option<String>,
     pub created_at: u64,
@@ -55,6 +79,7 @@ pub struct NewCard {
     pub labels: Vec<String>,
     #[serde(default)]
     pub label_colors: HashMap<String, String>,
+    pub sub_board: Option<SubBoard>,
     #[serde(default)]
     pub assignee: String,
     pub due_date: Option<String>,
@@ -90,6 +115,7 @@ fn default_board() -> Board {
                             .into(),
                     labels: vec!["示例".into()],
                     label_colors: HashMap::from([("示例".into(), "purple".into())]),
+                    sub_board: None,
                     assignee: "".into(),
                     due_date: None,
                     created_at: now(),
@@ -153,6 +179,7 @@ fn create_card(
         description: input.description,
         labels: input.labels,
         label_colors: input.label_colors,
+        sub_board: input.sub_board,
         assignee: input.assignee,
         due_date: input.due_date,
         created_at: timestamp,
@@ -190,6 +217,7 @@ fn update_card(
     card.description = input.description;
     card.labels = input.labels;
     card.label_colors = input.label_colors;
+    card.sub_board = input.sub_board;
     card.assignee = input.assignee;
     card.due_date = input.due_date;
     card.updated_at = timestamp;
