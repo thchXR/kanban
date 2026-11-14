@@ -114,7 +114,17 @@ async function finishPointerDrag(event) {
   dragGhost?.remove();
   dragGhost = null;
   document.querySelectorAll('.column').forEach(column => column.classList.remove('drag-over'));
-  if (wasDragged && target && source !== target.dataset.column) { board = await invoke('move_card', { cardId, fromColumn: source, toColumn: target.dataset.column }); render(); toast('任务已移动'); }
+  if (wasDragged && target && source !== target.dataset.column) { board = await invoke('move_card', { cardId, fromColumn: source, toColumn: target.dataset.column }); render(); if (target.dataset.column === 'done') { showCompletionFeedback(); } else { toast('任务已移动'); } }
+}
+
+function showCompletionFeedback() {
+  toast('任务完成！🎉');
+  const burst = document.createElement('div');
+  burst.className = 'completion-burst';
+  burst.innerHTML = Array.from({ length: 14 }, (_, index) => `<i style="--angle:${index * 25.7}deg;--color:${['#5d5fef','#35a46c','#e9863a','#d45ca0','#4778d8'][index % 5]}"></i>`).join('');
+  document.body.appendChild(burst);
+  requestAnimationFrame(() => burst.classList.add('show'));
+  setTimeout(() => burst.remove(), 850);
 }
 
 document.addEventListener('pointermove', updatePointerDrag, { passive: false });
