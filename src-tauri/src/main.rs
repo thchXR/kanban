@@ -68,6 +68,8 @@ pub struct Card {
 pub struct Column {
     pub id: String,
     pub title: String,
+    #[serde(default)]
+    pub color: String,
     pub cards: Vec<Card>,
 }
 
@@ -125,6 +127,7 @@ fn default_board() -> Board {
             Column {
                 id: "backlog".into(),
                 title: "待办".into(),
+                color: "orange".into(),
                 cards: vec![Card {
                     id: Uuid::new_v4().to_string(),
                     title: "欢迎使用看板".into(),
@@ -143,11 +146,13 @@ fn default_board() -> Board {
             Column {
                 id: "doing".into(),
                 title: "进行中".into(),
+                color: "blue".into(),
                 cards: vec![],
             },
             Column {
                 id: "done".into(),
                 title: "已完成".into(),
+                color: "green".into(),
                 cards: vec![],
             },
         ],
@@ -173,6 +178,20 @@ fn update_board_theme(theme: String, state: State<'_, AppState>) -> Result<Board
     } else {
         "light".into()
     };
+    board.updated_at = now();
+    let result = board.clone();
+    drop(board);
+    persist(&state)?;
+    Ok(result)
+}
+
+#[tauri::command]
+fn update_board_columns(columns: Vec<Column>, state: State<'_, AppState>) -> Result<Board, String> {
+    if columns.len() < 1 {
+        return Err("board must contain at least one column".into());
+    }
+    let mut board = state.board.lock().map_err(|e| e.to_string())?;
+    board.columns = columns;
     board.updated_at = now();
     let result = board.clone();
     drop(board);
@@ -355,6 +374,7 @@ pub fn run() {
             update_card,
             update_board_icon,
             update_board_theme,
+            update_board_columns,
             move_card,
             delete_card,
             export_board

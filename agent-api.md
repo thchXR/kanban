@@ -14,6 +14,7 @@
   "columns": [{
     "id": "backlog",
     "title": "待办",
+    "color": "orange",
     "cards": [{
       "id": "uuid",
       "title": "任务标题",
@@ -42,6 +43,7 @@ Agent 应按 `id` 定位卡片和列，不依赖数组顺序。推荐读取顺�
 - `update_card({ cardId, input: { title, description, labels, labelColors, assignee, dueDate } })`
 - `update_board_icon({ icon })`
 - `update_board_theme({ theme })`
+- `update_board_columns({ columns })` 保存板块的名称、颜色、顺序和卡片内容
 - `move_card({ cardId, fromColumn, toColumn })`
 - `delete_card({ cardId })`
 - `export_board()` 返回 JSON 文件路径
