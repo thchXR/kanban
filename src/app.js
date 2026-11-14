@@ -53,6 +53,11 @@ let dragGhost = null;
 let suppressClick = false;
 
 const $ = selector => document.querySelector(selector);
+function applyTheme(theme) { document.body.dataset.theme = theme; $('#themeBtn').textContent = theme === 'dark' ? '☀ 浅色' : '☾ 深色'; localStorage.setItem('kanban-theme', theme); }
+const savedTheme = localStorage.getItem('kanban-theme') || 'light';
+applyTheme(savedTheme);
+$('#themeBtn').onclick = () => applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+
 const esc = value => String(value ?? '').replace(/[&<>"']/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[match]));
 function toast(message) { const element = $('#toast'); element.textContent = message; element.classList.add('show'); setTimeout(() => element.classList.remove('show'), 2200); }
 function filteredCards(cards) { const query = $('#search').value.trim().toLowerCase(); return cards.filter(card => !query || [card.title, card.description, card.assignee, ...card.labels].join(' ').toLowerCase().includes(query)); }
