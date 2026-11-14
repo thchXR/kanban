@@ -30,6 +30,8 @@
 
 Agent 应按 `id` 定位卡片和列，不依赖数组顺序。推荐读取顺序是先按列语义分组，再按 `updatedAt` 降序处理。`dueDate` 是 ISO `YYYY-MM-DD` 或 `null`。
 
+每张卡片可以包含递归的 `subBoard`。嵌套看板使用同样的三列结构，嵌套卡片支持标题、描述、标签、负责人、截止日期和下一层 `subBoard`。agent 可以沿着 `subBoard.columns[].cards[]` 递归读取全部层级，也可以把子看板提升到上一层。
+
 ## Tauri command
 
 前端或 harness 可以调用这些稳定命令。命令成功后返回完整的最新 `Board`。

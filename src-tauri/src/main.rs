@@ -16,7 +16,19 @@ use uuid::Uuid;
 pub struct SubCard {
     pub id: String,
     pub title: String,
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub labels: Vec<String>,
+    #[serde(default)]
+    pub label_colors: HashMap<String, String>,
+    #[serde(default)]
+    pub assignee: String,
+    #[serde(default)]
+    pub due_date: Option<String>,
     pub column_id: String,
+    #[serde(default)]
+    pub sub_board: Option<Box<SubBoard>>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -45,6 +57,7 @@ pub struct Card {
     #[serde(default)]
     pub sub_board: Option<SubBoard>,
     pub assignee: String,
+    #[serde(default)]
     pub due_date: Option<String>,
     pub created_at: u64,
     pub updated_at: u64,
@@ -79,9 +92,11 @@ pub struct NewCard {
     pub labels: Vec<String>,
     #[serde(default)]
     pub label_colors: HashMap<String, String>,
+    #[serde(default)]
     pub sub_board: Option<SubBoard>,
     #[serde(default)]
     pub assignee: String,
+    #[serde(default)]
     pub due_date: Option<String>,
 }
 
