@@ -78,6 +78,8 @@ pub struct Board {
     pub title: String,
     #[serde(default)]
     pub icon: String,
+    #[serde(default)]
+    pub theme: String,
     pub updated_at: u64,
     pub columns: Vec<Column>,
 }
@@ -117,6 +119,7 @@ fn default_board() -> Board {
         id: "board-main".into(),
         title: "我的项目看板".into(),
         icon: "◆".into(),
+        theme: "light".into(),
         updated_at: now(),
         columns: vec![
             Column {
@@ -155,6 +158,21 @@ fn default_board() -> Board {
 fn update_board_icon(icon: String, state: State<'_, AppState>) -> Result<Board, String> {
     let mut board = state.board.lock().map_err(|e| e.to_string())?;
     board.icon = icon;
+    board.updated_at = now();
+    let result = board.clone();
+    drop(board);
+    persist(&state)?;
+    Ok(result)
+}
+
+#[tauri::command]
+fn update_board_theme(theme: String, state: State<'_, AppState>) -> Result<Board, String> {
+    let mut board = state.board.lock().map_err(|e| e.to_string())?;
+    board.theme = if theme == "dark" {
+        "dark".into()
+    } else {
+        "light".into()
+    };
     board.updated_at = now();
     let result = board.clone();
     drop(board);
@@ -336,6 +354,7 @@ pub fn run() {
             create_card,
             update_card,
             update_board_icon,
+            update_board_theme,
             move_card,
             delete_card,
             export_board

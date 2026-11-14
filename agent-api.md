@@ -9,6 +9,7 @@
   "id": "board-main",
   "title": "我的项目看板",
   "icon": "◆",
+  "theme": "light",
   "updatedAt": 1700000000,
   "columns": [{
     "id": "backlog",
@@ -40,6 +41,7 @@ Agent 应按 `id` 定位卡片和列，不依赖数组顺序。推荐读取顺�
 - `create_card({ columnId, input: { title, description, labels, assignee, dueDate } })`
 - `update_card({ cardId, input: { title, description, labels, labelColors, assignee, dueDate } })`
 - `update_board_icon({ icon })`
+- `update_board_theme({ theme })`
 - `move_card({ cardId, fromColumn, toColumn })`
 - `delete_card({ cardId })`
 - `export_board()` 返回 JSON 文件路径

@@ -1,5 +1,5 @@
 const fallbackBoard = {
-  id: 'board-main', title: '我的项目看板', icon: '◆', updatedAt: Date.now(),
+  id: 'board-main', title: '我的项目看板', icon: '◆', theme: 'light', updatedAt: Date.now(),
   columns: [
     { id: 'backlog', title: '待办', cards: [{ id: 'demo-card', title: '欢迎使用看板', description: '拖动卡片到其他列，点击卡片可以编辑。', labels: ['示例'], labelColors: { 示例: 'purple' }, assignee: '', dueDate: null }] },
     { id: 'doing', title: '进行中', cards: [] },
@@ -16,7 +16,7 @@ const invoke = window.__TAURI__?.core?.invoke || (async (name, args = {}) => {
     const data = saved ? JSON.parse(saved) : structuredClone(fallbackBoard);
     if (name === 'get_board') return data;
     if (name === 'export_board') return 'browser-local-storage';
-    if (name === 'update_board_icon') data.icon = args.icon;
+    if (name === 'update_board_icon') data.icon = args.icon; if (name === 'update_board_theme') data.theme = args.theme === 'dark' ? 'dark' : 'light';
     if (name === 'delete_card') data.columns.forEach(column => { column.cards = column.cards.filter(card => card.id !== args.cardId); });
     if (name === 'move_card') {
       const from = data.columns.find(column => column.id === args.fromColumn);
@@ -53,10 +53,10 @@ let dragGhost = null;
 let suppressClick = false;
 
 const $ = selector => document.querySelector(selector);
-function applyTheme(theme) { document.body.dataset.theme = theme; $('#themeBtn').textContent = theme === 'dark' ? '☀ 浅色' : '☾ 深色'; localStorage.setItem('kanban-theme', theme); }
+function applyTheme(theme) { document.documentElement.dataset.theme = theme; document.body.dataset.theme = theme; $('#themeBtn').textContent = theme === 'dark' ? '☀ 浅色' : '☾ 深色'; localStorage.setItem('kanban-theme', theme); }
 const savedTheme = localStorage.getItem('kanban-theme') || 'light';
 applyTheme(savedTheme);
-$('#themeBtn').onclick = () => applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+$('#themeBtn').onclick = async () => { const theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark'; board = await invoke('update_board_theme', { theme }); applyTheme(theme); render(); };
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[match]));
 function toast(message) { const element = $('#toast'); element.textContent = message; element.classList.add('show'); setTimeout(() => element.classList.remove('show'), 2200); }
@@ -178,4 +178,4 @@ $('#labels').addEventListener('input', renderLabelEditor);
 $('#cardForm').onsubmit = async event => { event.preventDefault(); const wasEditing = Boolean(editingId); const labels = $('#labels').value.split(',').map(value => value.trim()).filter(Boolean); const input = { title: $('#title').value.trim(), description: $('#description').value, assignee: $('#assignee').value.trim(), dueDate: $('#dueDate').value || null, labels, labelColors: Object.fromEntries(labels.map(label => [label, labelColors[label] || defaultLabelColor])), subBoard: editingSubBoard }; if (!input.title) return; if (nestedEditingCard) { Object.assign(nestedEditingCard, input, { columnId: nestedEditingCard.columnId }); nestedEditingCard = null; $('#cardDialog').close(); event.target.reset(); editingSubBoard = null; labelColors = {}; defaultLabelColor = 'purple'; renderNestedBoard(); return; } board = await invoke(wasEditing ? 'update_card' : 'create_card', wasEditing ? { cardId: editingId, input } : { columnId: $('#cardDialog').dataset.column || 'backlog', input }); $('#cardDialog').close(); event.target.reset(); editingId = null; labelColors = {}; defaultLabelColor = 'purple'; editingSubBoard = null; render(); toast(wasEditing ? '任务已更新' : '任务已创建'); };
 $('#search').oninput = render;
 $('#exportBtn').onclick = async () => { const path = await invoke('export_board'); toast('已保存：' + path); };
-invoke('get_board').then(data => { board = data; render(); }).catch(error => toast('加载失败：' + error));
+invoke('get_board').then(data => { board = data; applyTheme(board.theme || savedTheme); render(); }).catch(error => toast('加载失败：' + error));
