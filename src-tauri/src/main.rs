@@ -225,7 +225,9 @@ fn persist(state: &AppState) -> Result<(), String> {
     if let Some(parent) = state.path.parent() {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
-    fs::write(&state.path, data).map_err(|e| e.to_string())
+    let temporary_path = state.path.with_extension("json.tmp");
+    fs::write(&temporary_path, data).map_err(|e| e.to_string())?;
+    fs::rename(&temporary_path, &state.path).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
