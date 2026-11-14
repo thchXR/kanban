@@ -60,7 +60,7 @@ function render() {
   $('#iconBtn').textContent = board.icon || '◆';
   const allCards = board.columns.flatMap(column => column.cards);
   $('#stats').innerHTML = `<div class="stat"><strong>${allCards.length}</strong><span>全部任务</span></div><div class="stat"><strong>${board.columns.find(column => column.id === 'done')?.cards.length || 0}</strong><span>已完成</span></div><div class="stat"><strong>${allCards.filter(card => card.assignee).length}</strong><span>已分配</span></div>`;
-  $('#board').innerHTML = board.columns.map(column => `<section class="column" data-column="${column.id}"><div class="column-head"><span class="column-title">${esc(column.title)}</span><div><span class="count">${filteredCards(column.cards).length}</span><button type="button" class="quick-add" data-column="${column.id}" title="在此列添加">＋</button></div></div><div class="cards">${filteredCards(column.cards).length ? filteredCards(column.cards).map(cardHtml).join('') : '<div class="empty">暂无匹配任务<br>拖动任务到这里</div>'}</div></section>`).join('');
+  $('#board').innerHTML = board.columns.map(column => `<section class="column column-${column.id}" data-column="${column.id}"><div class="column-head"><span class="column-title">${esc(column.title)}</span><div><span class="count">${filteredCards(column.cards).length}</span><button type="button" class="quick-add" data-column="${column.id}" title="在此列添加">＋</button></div></div><div class="cards">${filteredCards(column.cards).length ? filteredCards(column.cards).map(cardHtml).join('') : '<div class="empty">暂无匹配任务<br>拖动任务到这里</div>'}</div></section>`).join('');
 
   document.querySelectorAll('.card').forEach(card => {
     card.addEventListener('pointerdown', event => beginPointerDrag(event, card));
