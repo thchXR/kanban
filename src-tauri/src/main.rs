@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fs,
     path::PathBuf,
     sync::Mutex,
@@ -191,6 +191,26 @@ fn update_board_columns(columns: Vec<Column>, state: State<'_, AppState>) -> Res
         return Err("board must contain at least one column".into());
     }
     let mut board = state.board.lock().map_err(|e| e.to_string())?;
+    let old_card_ids: HashSet<&str> = board
+        .columns
+        .iter()
+        .flat_map(|column| column.cards.iter().map(|card| card.id.as_str()))
+        .collect();
+    let mut new_card_ids = HashSet::new();
+    let mut column_ids = HashSet::new();
+    for column in &columns {
+        if !column_ids.insert(column.id.as_str()) {
+            return Err("column ids must be unique".into());
+        }
+        for card in &column.cards {
+            if !new_card_ids.insert(card.id.as_str()) {
+                return Err("card ids must be unique".into());
+            }
+        }
+    }
+    if !old_card_ids.is_subset(&new_card_ids) {
+        return Err("column update cannot discard existing cards".into());
+    }
     board.columns = columns;
     board.updated_at = now();
     let result = board.clone();
